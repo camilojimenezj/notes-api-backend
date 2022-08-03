@@ -65,10 +65,12 @@ app.post('/api/notes', (req, res) => {
 
 app.put('/api/notes/:id', (req, res) => {
   const id = req.params.id
-  const { newObject } = req.body
-  const noteId = notes.indexOf(note => note.id === id)
-  notes[noteId] = newObject
-  res.status(202).end()
+  const newObject = req.body
+  const targetNote = notes.find(note => note.id === parseInt(id))
+  const noteId = notes.indexOf(targetNote)
+  notes[noteId] = { ...targetNote, ...newObject }
+  console.log(notes)
+  res.status(202).json(newObject)
 })
 
 app.use((req, res, next) => {
