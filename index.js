@@ -63,6 +63,14 @@ app.post('/api/notes', (req, res) => {
   res.status(201).json(newNote)
 })
 
+app.put('/api/notes/:id', (req, res) => {
+  const id = req.params.id
+  const { newObject } = req.body
+  const noteId = notes.indexOf(note => note.id === id)
+  notes[noteId] = newObject
+  res.status(202).end()
+})
+
 app.use((req, res, next) => {
   res.status(404).send('Not found')
 })
