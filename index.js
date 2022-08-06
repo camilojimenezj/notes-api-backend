@@ -17,16 +17,18 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello world</h1>')
 })
 
-app.get('/api/notes', (req, res) => {
+app.get('/api/notes', (req, res, next) => {
   Note.find({}).then(notes => {
-    res.json(notes)
+    res.status(200).json(notes)
+  }).catch(err => {
+    next(err)
   })
 })
 
 app.get('/api/notes/:id', (req, res, next) => {
   const id = req.params.id
   Note.findById(id).then(note => {
-    note ? res.json(note) : res.status(404).end()
+    note ? res.status(200).json(note) : res.status(404).end()
   }).catch(err => {
     next(err)
   })
@@ -42,10 +44,13 @@ app.delete('/api/notes/:id', (req, res, next) => {
 })
 
 app.post('/api/notes', (req, res) => {
-  const note = req.body
+  const { content, important = false } = req.body
+  if (!content) {
+    return res.status(400).json({ error: 'bad request' })
+  }
   const newNote = new Note({
-    content: note.content,
-    important: note.important || false,
+    content,
+    important,
     date: new Date().toISOString()
   })
   newNote.save().then(savedNote => {
@@ -72,6 +77,8 @@ app.use(notFound)
 app.use(handleErrors)
 
 const PORT = process.env.PORT
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+module.exports = { server, app }
