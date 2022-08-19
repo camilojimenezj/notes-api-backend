@@ -1,7 +1,18 @@
 const mongoose = require('mongoose')
 const { server } = require('../index')
 const Note = require('../models/Note')
-const { initialNotes, api, getAllContentFromNotes } = require('./helpers')
+const User = require('../models/User')
+const { initialNotes, api, getAllContentFromNotes, initialUser, getUsers } = require('./helpers')
+
+beforeAll(async () => {
+  await User.deleteMany({})
+  const { password, ...newUser } = initialUser
+  const user = new User({
+    ...newUser,
+    passwordHash: password
+  })
+  await user.save()
+})
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -26,8 +37,10 @@ describe('get', () => {
 
 describe('post', () => {
   test('a valid note can be added', async () => {
+    const user = await getUsers()
     const newNote = {
-      content: 'proximamente solo en cines'
+      content: 'proximamente solo en cines',
+      userId: user[0].id
     }
     await api
       .post('/api/notes')
@@ -40,8 +53,10 @@ describe('post', () => {
   })
 
   test('a note without content is not added', async () => {
+    const user = await getUsers()
     const newNote = {
-      important: false
+      important: false,
+      userId: user[0].id
     }
     await api
       .post('/api/notes')

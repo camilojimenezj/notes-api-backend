@@ -1,7 +1,9 @@
 POST http://localhost:3001/api/notes
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhbWlsb2pqIiwiaWQiOiI2MmYyZDU5ZTEzNmRkYTUyYjYxN2VkZDUiLCJpYXQiOjE2NjA2Nzg3MzcsImV4cCI6MTY2MTI4MzUzN30.IMXJOqTxk1_n8IIvUmBgRoRLuW0g22scuMXNjgO3WzU
 
 {
-  "content": "hola mundo",
-  "important": true
+  "content": "auth 32",
+  "important": true,
+  "userId": "62f2d59e136dda52b617edd5"
 }
