@@ -2,16 +2,26 @@ const mongoose = require('mongoose')
 const { server } = require('../index')
 const Note = require('../models/Note')
 const User = require('../models/User')
+const bcrypt = require('bcrypt')
 const { initialNotes, api, getAllContentFromNotes, initialUser, getUsers } = require('./helpers')
+
+let token = ''
 
 beforeAll(async () => {
   await User.deleteMany({})
   const { password, ...newUser } = initialUser
   const user = new User({
     ...newUser,
-    passwordHash: password
+    passwordHash: await bcrypt.hash(password, 10)
   })
   await user.save()
+  const login = { username: initialUser.username, password: initialUser.password }
+
+  const res = await api
+    .post('/api/login')
+    .send(login)
+
+  token = `Bearer ${res.body.token}`
 })
 
 beforeEach(async () => {
@@ -45,6 +55,7 @@ describe('post', () => {
     await api
       .post('/api/notes')
       .send(newNote)
+      .set({ Authorization: token })
       .expect(201)
       .expect('Content-Type', /json/)
     const { contents, response } = await getAllContentFromNotes()
@@ -61,6 +72,7 @@ describe('post', () => {
     await api
       .post('/api/notes')
       .send(newNote)
+      .set({ Authorization: token })
       .expect(400)
     const response = await api.get('/api/notes')
     expect(response.body).toHaveLength(initialNotes.length)
@@ -71,9 +83,10 @@ describe('delete', () => {
   test('a note can be deleted', async () => {
     const { response } = await getAllContentFromNotes()
     const noteId = response.body[0].id
-    console.log(noteId)
+
     await api
       .delete(`/api/notes/${noteId}`)
+      .set({ Authorization: token })
       .expect(204)
 
     const result = await getAllContentFromNotes()
@@ -85,10 +98,11 @@ describe('put', () => {
   test('a note can be updated', async () => {
     const { response } = await getAllContentFromNotes()
     const noteId = response.body[0].id
-    console.log(noteId)
+
     await api
       .put(`/api/notes/${noteId}`)
       .send({ content: 'nota actualizada' })
+      .set({ Authorization: token })
       .expect(200)
 
     const { contents } = await getAllContentFromNotes()
@@ -100,7 +114,7 @@ describe('get one', () => {
   test('get a note by id', async () => {
     const { response } = await getAllContentFromNotes()
     const noteId = response.body[0].id
-    console.log(noteId)
+
     const result = await api
       .get(`/api/notes/${noteId}`)
       .expect(200)

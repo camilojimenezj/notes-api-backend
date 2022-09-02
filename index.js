@@ -4,7 +4,7 @@ require('./mongo')
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const morgan = require('morgan')
+/* const morgan = require('morgan') */
 
 const notFound = require('./middleware/notFound')
 const handleErrors = require('./middleware/handleErrors')
@@ -14,7 +14,7 @@ const loginRouter = require('./controllers/login')
 
 app.use(cors())
 app.use(express.json())
-app.use(morgan('tiny'))
+/* app.use(morgan('tiny')) */
 
 // routes
 
